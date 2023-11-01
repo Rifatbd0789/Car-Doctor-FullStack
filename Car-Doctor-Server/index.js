@@ -51,7 +51,7 @@ async function run() {
 
     const serviceCollection = client.db("carDoctorDB").collection("services");
     const bookingCollection = client.db("carDoctorDB").collection("bookings");
-    // jwt
+    // set jwt token
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -60,11 +60,16 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: true,
+          sameSite: "none",
         })
         .send({ success: true });
     });
-
+    // delete jwt token
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
     // to load all data
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
